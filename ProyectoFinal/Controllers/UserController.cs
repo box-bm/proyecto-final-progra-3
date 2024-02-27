@@ -25,7 +25,7 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
         UserName = user.UserName,
         Email = user.Email,
         Name = user.Name,
-        Address = user.Address
+        Address = user.Address,
       };
 
       var result = await userManager.CreateAsync(newUser, user.Password);
@@ -58,9 +58,15 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
       if (!isValid) return Unauthorized();
 
       var roles = await userManager.GetRolesAsync(user);
+      await userManager.AddLoginAsync(user, new UserLoginInfo("Local", userCredentials.Email, "Local"));
 
-      var token = new JWTConfig(_config).CreateToken(new UserClaims(user.Name, user.Email!, user.UserName, [.. roles]));
-      return Ok(token);
+      var claims = new UserClaims(user.Name, user.Email!, user.UserName, [.. roles]).GetClaims();
+      var token = new JWTConfig(_config).CreateToken(claims);
+
+      await userManager.SetAuthenticationTokenAsync(user, "Local", "Token", token);
+      await userManager.AddClaimsAsync(user, claims);
+
+      return Ok(new { token });
     }
     catch (Exception)
     {
