@@ -35,9 +35,12 @@ public class SeedConfig(WebApplication app)
       {
         Name = "Admin"
       });
+      await roleManager.CreateAsync(new IdentityRole
+      {
+        Name = "Customer"
+      });
 
       await userManager.AddToRoleAsync(newUser, "Admin");
-      await userManager.AddToRoleAsync(newUser, "AnotherRole");
     }
   }
 }

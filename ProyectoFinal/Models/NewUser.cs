@@ -1,10 +1,10 @@
 ﻿namespace ProyectoFinal.Models;
 
-public interface INewUser
+public class NewUser
 {
-  string Email { get; }
-  string Password { get; }
-  string Name { get; }
-  string Address { get; }
-  string UserName { get; }
+  public required string Email { get; set; }
+  public required string Password { get; set; }
+  public required string Name { get; set; }
+  public string Address { get; set; } = "";
+  public required string UserName { get; set; }
 }

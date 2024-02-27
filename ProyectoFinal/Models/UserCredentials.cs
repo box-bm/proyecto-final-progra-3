@@ -1,7 +1,8 @@
 ﻿namespace ProyectoFinal.Models;
 
-public interface IUserCredentials
+
+public class UserCredentials
 {
-  string Email { get; set; }
-  string Password { get; set; }
+  public required string Email { set; get; }
+  public required string Password { set; get; }
 }

@@ -16,7 +16,7 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
 
   [HttpPost]
   [Route("register")]
-  public async Task<ActionResult> Create([FromBody] INewUser user)
+  public async Task<ActionResult> Create(NewUser user)
   {
     try
     {
@@ -30,7 +30,13 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
 
       var result = await userManager.CreateAsync(newUser, user.Password);
 
-      return Created();
+      if (result.Succeeded)
+      {
+        await userManager.AddToRoleAsync(newUser, "Customer");
+        return Created();
+      }
+      else
+        return StatusCode(StatusCodes.Status412PreconditionFailed, result.Errors);
     }
     catch (Exception)
     {
@@ -40,7 +46,7 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
 
   [HttpPost]
   [Route("login")]
-  public async Task<ActionResult> Login([FromBody] IUserCredentials userCredentials)
+  public async Task<ActionResult> Login(UserCredentials userCredentials)
   {
     try
     {
