@@ -8,9 +8,8 @@ namespace ProyectoFinal;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthenticationController(AppDbContext context, UserManager<User> userManager, IConfiguration _config) : ControllerBase
+public class AuthenticationController(UserManager<User> userManager, IConfiguration _config) : ControllerBase
 {
-  private readonly AppDbContext _context = context;
   private readonly UserManager<User> userManager = userManager;
   private readonly IConfiguration _config = _config;
 

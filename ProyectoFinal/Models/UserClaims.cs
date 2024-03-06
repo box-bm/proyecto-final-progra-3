@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Security.Claims;
 using Microsoft.VisualBasic;
 
@@ -12,7 +13,7 @@ public class UserClaims(string name, string email, string? Username, List<string
 
   public List<Claim> GetClaims()
   {
-    var claimProperties = typeof(UserClaims).GetProperties();
+    var claimProperties = GetType().GetFields();
 
     var claims = new List<Claim>();
 

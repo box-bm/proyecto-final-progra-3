@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProyectoFinal.Entities;
 using ProyectoFinal.Utils;
+using ProyectoFinal.Midleware;
 
 var builder = WebApplication.CreateBuilder(args);
 IServiceCollection services = builder.Services;
@@ -82,5 +83,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.UseJwtMiddleware();
 
 app.Run();

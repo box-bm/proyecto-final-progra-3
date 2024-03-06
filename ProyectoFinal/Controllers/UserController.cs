@@ -7,9 +7,9 @@ namespace ProyectoFinal;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(AppDbContext context, UserManager<User> userManager) : ControllerBase
+public class UserController(UserManager<User> userManager) : ControllerBase
 {
-  private readonly AppDbContext _context = context;
+
   private readonly UserManager<User> userManager = userManager;
 
 
