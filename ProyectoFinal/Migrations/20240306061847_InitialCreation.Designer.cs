@@ -12,8 +12,8 @@ using ProyectoFinal;
 namespace ProyectoFinal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240227060352_initial")]
-    partial class initial
+    [Migration("20240306061847_InitialCreation")]
+    partial class InitialCreation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -192,9 +192,20 @@ namespace ProyectoFinal.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Cover")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Prologue")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
 
                     b.HasKey("BookId");
 
@@ -220,6 +231,92 @@ namespace ProyectoFinal.Migrations
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.Inventory", b =>
+                {
+                    b.Property<int>("InventoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InventoryId"));
+
+                    b.Property<int>("Available")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Balance")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Borrowed")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("InventoryId");
+
+                    b.HasIndex("BookId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Inventory");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.Return", b =>
+                {
+                    b.Property<int>("ReturnId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ReturnId"));
+
+                    b.Property<int>("LoanId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ReturnDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ReturnId");
+
+                    b.HasIndex("LoanId");
+
+                    b.ToTable("Returns");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.Transaction", b =>
+                {
+                    b.Property<int>("TransactionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TransactionID"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("TransactionID");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("ProyectoFinal.Entities.User", b =>
@@ -294,6 +391,38 @@ namespace ProyectoFinal.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ProyectoFinal.Loan", b =>
+                {
+                    b.Property<int>("LoanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("LoanId"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsReturned")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LoanDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("LoanId");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Loans");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -364,14 +493,93 @@ namespace ProyectoFinal.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("ProyectoFinal.Entities.Inventory", b =>
+                {
+                    b.HasOne("ProyectoFinal.Entities.Book", "Book")
+                        .WithOne("Inventory")
+                        .HasForeignKey("ProyectoFinal.Entities.Inventory", "BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProyectoFinal.Entities.User", null)
+                        .WithMany("Inventory")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.Return", b =>
+                {
+                    b.HasOne("ProyectoFinal.Loan", "Loan")
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.Transaction", b =>
+                {
+                    b.HasOne("ProyectoFinal.Entities.Book", "Book")
+                        .WithMany("Transactions")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProyectoFinal.Entities.User", "User")
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Loan", b =>
+                {
+                    b.HasOne("ProyectoFinal.Entities.Book", "Book")
+                        .WithMany("Loans")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProyectoFinal.Entities.User", "User")
+                        .WithMany("Loans")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ProyectoFinal.Entities.Author", b =>
                 {
                     b.Navigation("Books");
                 });
 
+            modelBuilder.Entity("ProyectoFinal.Entities.Book", b =>
+                {
+                    b.Navigation("Inventory")
+                        .IsRequired();
+
+                    b.Navigation("Loans");
+
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("ProyectoFinal.Entities.Category", b =>
                 {
                     b.Navigation("Books");
+                });
+
+            modelBuilder.Entity("ProyectoFinal.Entities.User", b =>
+                {
+                    b.Navigation("Inventory");
+
+                    b.Navigation("Loans");
+
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

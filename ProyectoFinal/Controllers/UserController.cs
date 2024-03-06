@@ -2,17 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using ProyectoFinal.Entities;
 using ProyectoFinal.Models;
-using ProyectoFinal.Utils;
 
 namespace ProyectoFinal;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(AppDbContext context, UserManager<User> userManager, IConfiguration config) : ControllerBase
+public class UserController(AppDbContext context, UserManager<User> userManager) : ControllerBase
 {
   private readonly AppDbContext _context = context;
   private readonly UserManager<User> userManager = userManager;
-  private IConfiguration _config = config;
+
 
   [HttpPost]
   [Route("register")]
@@ -44,34 +43,40 @@ public class UserController(AppDbContext context, UserManager<User> userManager,
     }
   }
 
-  [HttpPost]
-  [Route("login")]
-  public async Task<ActionResult> Login(UserCredentials userCredentials)
+  [HttpDelete("{id}")]
+  public async Task<ActionResult> Delete(int id)
   {
-    try
+    var user = await userManager.FindByIdAsync(id.ToString());
+
+    if (user == null)
     {
-      var user = await userManager.FindByEmailAsync(userCredentials.Email);
-
-      if (user == null) return NotFound();
-
-      var isValid = await userManager.CheckPasswordAsync(user, userCredentials.Password);
-      if (!isValid) return Unauthorized();
-
-      var roles = await userManager.GetRolesAsync(user);
-      await userManager.AddLoginAsync(user, new UserLoginInfo("Local", userCredentials.Email, "Local"));
-
-      var claims = new UserClaims(user.Name, user.Email!, user.UserName, [.. roles]).GetClaims();
-      var token = new JWTConfig(_config).CreateToken(claims);
-
-      await userManager.SetAuthenticationTokenAsync(user, "Local", "Token", token);
-      await userManager.AddClaimsAsync(user, claims);
-
-      return Ok(new { token });
+      return NotFound();
     }
-    catch (Exception)
-    {
-      return BadRequest();
-    }
+
+    await userManager.DeleteAsync(user);
+    return Ok();
   }
+
+  [HttpPut("{id}")]
+  public async Task<ActionResult> Update(int id, User user)
+  {
+    var registeredUser = await userManager.FindByIdAsync(id.ToString());
+
+    if (registeredUser == null)
+    {
+      return NotFound();
+    }
+
+    registeredUser.Email = user.Email;
+    registeredUser.Name = user.Name;
+    registeredUser.Address = user.Address;
+    registeredUser.UserName = user.UserName;
+
+    await userManager.UpdateAsync(registeredUser);
+
+    return Ok();
+  }
+
+
 
 }

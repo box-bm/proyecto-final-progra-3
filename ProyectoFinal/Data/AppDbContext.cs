@@ -17,4 +17,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
   public DbSet<Book> Books { set; get; }
 
   public DbSet<Category> Categories { set; get; }
+
+  public DbSet<Transaction> Transactions { set; get; }
+
+  public DbSet<Inventory> Inventory { set; get; }
+
+  public DbSet<Loan> Loans { set; get; }
+
+  public DbSet<Return> Returns { set; get; }
 }
